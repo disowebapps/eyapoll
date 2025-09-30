@@ -1,0 +1,166 @@
+/* Admin Dashboard Styles */
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Card hover effects */
+.dashboard-card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-lg hover:border-slate-300 transition-all duration-300;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Metric cards with gradient backgrounds */
+.metric-card-elections {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.metric-card-voters {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+.metric-card-security {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.metric-card-performance {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+/* Loading animations */
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.loading-pulse {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Chart container styles */
+.chart-container {
+    position: relative;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.chart-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* Status indicators */
+.status-indicator {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-healthy {
+    @apply bg-emerald-100 text-emerald-800;
+}
+
+.status-warning {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-error {
+    @apply bg-red-100 text-red-800;
+}
+
+/* Quick action buttons */
+.quick-action {
+    @apply flex items-center p-3 rounded-lg transition-all duration-200 group cursor-pointer;
+}
+
+.quick-action:hover {
+    transform: translateX(4px);
+}
+
+/* Real-time indicator */
+.realtime-indicator {
+    position: relative;
+}
+
+.realtime-indicator::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .metric-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .metric-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .dashboard-card {
+        @apply bg-slate-800 border-slate-700;
+    }
+    
+    .dashboard-card:hover {
+        @apply border-slate-600;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .dashboard-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+}

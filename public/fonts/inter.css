@@ -1,0 +1,38 @@
+/* Inter Font - Self-hosted */
+/* Note: Download Inter font files from https://fonts.google.com/specimen/Inter and place them in this directory */
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('inter-regular.woff2') format('woff2'),
+         url('inter-regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('inter-medium.woff2') format('woff2'),
+         url('inter-medium.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('inter-semibold.woff2') format('woff2'),
+         url('inter-semibold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('inter-bold.woff2') format('woff2'),
+         url('inter-bold.woff') format('woff');
+}

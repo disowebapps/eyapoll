@@ -1,0 +1,29 @@
+# Echara Voting System - Cron Jobs Configuration for Hostinger
+# Add these cron jobs in your Hostinger control panel
+
+# Laravel Scheduler (runs every minute to check for scheduled tasks)
+* * * * * cd /home/u297970444/domains/yourdomain.com/public_html && php artisan schedule:run >> /dev/null 2>&1
+
+# Queue Worker Monitoring (restart if not running)
+*/5 * * * * cd /home/u297970444/domains/yourdomain.com/public_html && php artisan queue:restart >> /dev/null 2>&1
+
+# Queue Worker (process jobs - run every 5 minutes)
+*/5 * * * * cd /home/u297970444/domains/yourdomain.com/public_html && timeout 300 php artisan queue:work --timeout=60 --tries=3 --max-jobs=50 >> /dev/null 2>&1
+
+# Database cleanup (daily at 2 AM)
+0 2 * * * cd /home/u297970444/domains/yourdomain.com/public_html && php artisan cleanup:expired-files >> /dev/null 2>&1
+
+# System metrics collection (every 15 minutes)
+*/15 * * * * cd /home/u297970444/domains/yourdomain.com/public_html && php artisan collect:system-metrics >> /dev/null 2>&1
+
+# Log rotation (daily at 3 AM)
+0 3 * * * cd /home/u297970444/domains/yourdomain.com/public_html && find storage/logs -name "*.log" -mtime +7 -delete >> /dev/null 2>&1
+
+# Session cleanup (daily at 1 AM)
+0 1 * * * cd /home/u297970444/domains/yourdomain.com/public_html && php artisan session:gc >> /dev/null 2>&1
+
+# Cache optimization (daily at 4 AM)
+0 4 * * * cd /home/u297970444/domains/yourdomain.com/public_html && php artisan optimize >> /dev/null 2>&1
+
+# Backup database (daily at 5 AM)
+0 5 * * * cd /home/u297970444/domains/yourdomain.com/public_html && php artisan backup:database >> /dev/null 2>&1
