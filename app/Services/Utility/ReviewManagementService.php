@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Utility;
 
 use App\Models\Admin;
 use App\Models\Auth\IdDocument;

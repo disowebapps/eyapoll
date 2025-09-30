@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Verification;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -26,15 +26,17 @@ class RegistrationSessionService
         try {
             $sessionId = self::getSessionId();
             
-            DB::table('registration_sessions')->updateOrInsert(
-                ['session_id' => $sessionId],
+            DB::table('registration_sessions')->upsert(
                 [
+                    'session_id' => $sessionId,
                     "step{$step}_data" => json_encode($data),
                     'current_step' => $step,
                     'expires_at' => now()->addHours(24),
                     'updated_at' => now(),
                     'created_at' => now(),
-                ]
+                ],
+                ['session_id'],
+                ["step{$step}_data", 'current_step', 'expires_at', 'updated_at']
             );
         } catch (Exception $e) {
             Log::error('Failed to save registration step', [

@@ -8,9 +8,9 @@ use App\Models\Auth\IdDocument;
 use App\Models\User;
 use App\Livewire\Admin\BaseAdminComponent;
 use App\Services\Auth\MFAService;
-use App\Services\AuditLoggingService;
-use App\Services\DocumentManagementService;
-use App\Services\ReviewManagementService;
+use App\Services\Monitoring\AuditLoggingService;
+use App\Services\Document\DocumentManagementService;
+use App\Services\Utility\ReviewManagementService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -107,7 +107,7 @@ class KycReview extends BaseAdminComponent
         }
 
         $documents = IdDocument::whereIn('id', $this->selectedDocuments)->get();
-        $kycService = app(\App\Services\KycService::class);
+        $kycService = app(\App\Services\Verification\KycService::class);
         $count = 0;
 
         DB::transaction(function () use ($documents, $admin, $kycService, &$count) {
@@ -117,7 +117,7 @@ class KycReview extends BaseAdminComponent
                     $count++;
 
                     // Log audit
-                    $auditService = app(AuditLoggingService::class);
+                    $auditService = app(\App\Services\Monitoring\AuditLoggingService::class);
                     $auditService->logKycReview($admin, $document->user, 'approve', [
                         'document_id' => $document->id,
                     ]);
@@ -163,7 +163,7 @@ class KycReview extends BaseAdminComponent
         }
 
         $documents = IdDocument::whereIn('id', $this->selectedDocuments)->get();
-        $kycService = app(\App\Services\KycService::class);
+        $kycService = app(\App\Services\Verification\KycService::class);
         $count = 0;
 
         DB::transaction(function () use ($documents, $admin, $kycService, &$count) {
@@ -173,7 +173,7 @@ class KycReview extends BaseAdminComponent
                     $count++;
 
                     // Log audit
-                    $auditService = app(AuditLoggingService::class);
+                    $auditService = app(\App\Services\Monitoring\AuditLoggingService::class);
                     $auditService->logKycReview($admin, $document->user, 'reject', [
                         'document_id' => $document->id,
                         'rejection_reason' => $this->bulkRejectionReason,
@@ -206,7 +206,7 @@ class KycReview extends BaseAdminComponent
     public function openAssignModal($documentId)
     {
         $this->assignDocumentId = $documentId;
-        $reviewService = app(ReviewManagementService::class);
+        $reviewService = app(\App\Services\Utility\ReviewManagementService::class);
         $this->availableReviewers = $reviewService->getAvailableReviewers()->map(function ($reviewer) {
             return [
                 'id' => $reviewer->id,
@@ -234,7 +234,7 @@ class KycReview extends BaseAdminComponent
         $document = IdDocument::findOrFail($this->assignDocumentId);
         $reviewer = \App\Models\Admin::findOrFail($this->selectedReviewerId);
 
-        $reviewService = app(ReviewManagementService::class);
+        $reviewService = app(\App\Services\Utility\ReviewManagementService::class);
         if ($reviewService->assignReviewer($document, $reviewer)) {
             session()->flash('success', 'Reviewer assigned successfully.');
             $this->closeAssignModal();
@@ -245,7 +245,7 @@ class KycReview extends BaseAdminComponent
 
     public function autoAssignReviewers()
     {
-        $reviewService = app(ReviewManagementService::class);
+        $reviewService = app(\App\Services\Utility\ReviewManagementService::class);
         $stats = $reviewService->autoAssignReviewers();
 
         if ($stats['id_documents_assigned'] > 0) {
@@ -304,8 +304,8 @@ class KycReview extends BaseAdminComponent
                 $document = IdDocument::findOrFail($this->selectedDocument['id']);
                 $user = $document->user;
 
-                $kycService = app(\App\Services\KycService::class);
-                $reviewService = app(ReviewManagementService::class);
+                $kycService = app(\App\Services\Verification\KycService::class);
+                $reviewService = app(\App\Services\Utility\ReviewManagementService::class);
 
                 // Start review if not already started
                 if (!$document->review_started_at) {
@@ -323,7 +323,7 @@ class KycReview extends BaseAdminComponent
                 }
 
                 // Log audit
-                $auditService = app(AuditLoggingService::class);
+                $auditService = app(\App\Services\Monitoring\AuditLoggingService::class);
                 $auditService->logKycReview($admin, $user, $this->reviewAction, [
                     'document_id' => $document->id,
                     'rejection_reason' => $this->rejectionReason ?? null,

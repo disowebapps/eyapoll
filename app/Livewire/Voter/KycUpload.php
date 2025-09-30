@@ -265,7 +265,7 @@ class KycUpload extends Component
                 'document_type' => $this->documentType,
             ]);
 
-            $kycService = app(\App\Services\KycService::class);
+            $kycService = app(\App\Services\Verification\KycService::class);
             $document = $kycService->uploadDocument($user, [
                 'type' => $this->documentType,
                 'file' => $this->uploadedFile,
@@ -283,7 +283,7 @@ class KycUpload extends Component
                 'document_id' => $document->id ?? null,
             ]);
 
-            $verificationService = app(\App\Services\DocumentVerificationService::class);
+            $verificationService = app(\App\Services\Document\DocumentVerificationService::class);
             $verificationResult = $verificationService->quickVerify($document);
 
             Log::info('KYC upload: quick verification completed', [

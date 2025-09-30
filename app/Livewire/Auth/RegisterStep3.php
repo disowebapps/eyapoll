@@ -30,13 +30,13 @@ class RegisterStep3 extends Component
     public function mount()
     {
         // Check if previous steps are completed
-        if (!\App\Services\RegistrationSessionService::getStepData(1) || 
-            !\App\Services\RegistrationSessionService::getStepData(2)) {
+        if (!\App\Services\Verification\RegistrationSessionService::getStepData(1) || 
+            !\App\Services\Verification\RegistrationSessionService::getStepData(2)) {
             return redirect()->route('auth.register');
         }
         
         // Load existing data if available
-        $existingData = \App\Services\RegistrationSessionService::getStepData(3);
+        $existingData = \App\Services\Verification\RegistrationSessionService::getStepData(3);
         if ($existingData) {
             $this->email_verification_code = $existingData['email_verification_code'] ?? '';
             $this->phone_verification_code = $existingData['phone_verification_code'] ?? '';
@@ -47,7 +47,7 @@ class RegisterStep3 extends Component
 
     private function generateOtpCodes()
     {
-        $step2Data = \App\Services\RegistrationSessionService::getStepData(2);
+        $step2Data = \App\Services\Verification\RegistrationSessionService::getStepData(2);
         if (!$step2Data || !isset($step2Data['email']) || !isset($step2Data['phone_number'])) {
             return;
         }
@@ -92,7 +92,7 @@ class RegisterStep3 extends Component
         }
         
         // Store step 3 data
-        \App\Services\RegistrationSessionService::saveStep(3, [
+        \App\Services\Verification\RegistrationSessionService::saveStep(3, [
             'email_verification_code' => $this->email_verification_code,
             'phone_verification_code' => $this->phone_verification_code,
         ]);
@@ -102,7 +102,7 @@ class RegisterStep3 extends Component
 
     private function validateOtpCodes()
     {
-        $step2Data = \App\Services\RegistrationSessionService::getStepData(2);
+        $step2Data = \App\Services\Verification\RegistrationSessionService::getStepData(2);
         if (!$step2Data || !isset($step2Data['email']) || !isset($step2Data['phone_number'])) {
             $this->addError('email_verification_code', 'Session expired. Please restart registration.');
             return false;
@@ -125,17 +125,21 @@ class RegisterStep3 extends Component
         }
 
         // Store verification in database for reliability
-        DB::table('pending_verifications')->updateOrInsert(
-            ['email' => $email, 'phone_number' => $phone],
-            [
-                'email_otp' => $emailOtp,
-                'phone_otp' => $phoneOtp,
-                'email_verified' => true,
-                'phone_verified' => true,
-                'expires_at' => now()->addHour(),
-                'updated_at' => now()
-            ]
-        );
+        DB::table('pending_verifications')
+            ->upsert(
+                [
+                    'email' => $email,
+                    'phone_number' => $phone,
+                    'email_otp' => $emailOtp,
+                    'phone_otp' => $phoneOtp,
+                    'email_verified' => true,
+                    'phone_verified' => true,
+                    'expires_at' => now()->addHour(),
+                    'updated_at' => now()
+                ],
+                ['email'],
+                ['phone_number', 'email_otp', 'phone_otp', 'email_verified', 'phone_verified', 'expires_at', 'updated_at']
+            );
 
         return true;
     }
@@ -148,7 +152,7 @@ class RegisterStep3 extends Component
 
     public function resendEmailCode()
     {
-        $step2Data = \App\Services\RegistrationSessionService::getStepData(2);
+        $step2Data = \App\Services\Verification\RegistrationSessionService::getStepData(2);
         if (!$step2Data || !isset($step2Data['email'])) {
             return;
         }
@@ -172,7 +176,7 @@ class RegisterStep3 extends Component
 
     public function resendPhoneCode()
     {
-        $step2Data = \App\Services\RegistrationSessionService::getStepData(2);
+        $step2Data = \App\Services\Verification\RegistrationSessionService::getStepData(2);
         if (!$step2Data || !isset($step2Data['phone_number'])) {
             return;
         }

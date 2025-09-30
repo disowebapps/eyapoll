@@ -5,7 +5,7 @@ namespace App\Jobs;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\DocumentVerificationService;
+use App\Services\Document\DocumentVerificationService;
 use Illuminate\Support\Facades\Log;
 
 class ProcessDocumentVerification implements ShouldQueue

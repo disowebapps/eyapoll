@@ -21,7 +21,8 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @livewireStyles
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -113,7 +114,7 @@
         </div>
     </header>
 
-    <main class="pt-24 px-6 pb-6">
+    <main class="pt-8 px-6 pb-6">
         @if (session('success'))
             <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
                 <div class="flex items-center">
