@@ -20,6 +20,11 @@ class Election extends Model
 {
     use HasFactory, SoftDeletes;
     
+    public ?int $id = null;
+    public ?string $uuid = null;
+    public ?string $title = null;
+    public ?string $certification_hash = null;
+    
     private static $timeService;
 
     /**

@@ -45,7 +45,7 @@ class ElectionCertificationService
             // Log the certification
             $this->auditLog->log(
                 'election_certified',
-                $certifier->id,
+                $certifier,
                 'elections',
                 $election->id,
                 [

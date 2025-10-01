@@ -18,7 +18,8 @@ class Admin extends Authenticatable
      */
     use HasFactory, Notifiable, SoftDeletes;
 
-    public int $id;
+    public ?int $id = null;
+    public ?string $full_name = null;
 
     protected $fillable = [
         'uuid',
