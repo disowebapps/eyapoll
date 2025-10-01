@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Utility;
 
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Mail;

@@ -18,9 +18,37 @@ use App\Models\Candidate\PaymentProof;
 use App\Enums\Candidate\CandidateStatus;
 use App\Enums\Candidate\PaymentStatus;
 
+/**
+ * @property int $id
+ * @property string $user_id
+ * @property string $election_id
+ * @property string $position_id
+ * @property string $manifesto
+ * @property float $application_fee
+ * @property CandidateStatus $status
+ * @property PaymentStatus $payment_status
+ * @property string|null $approved_by
+ * @property string|null $suspended_by
+ * @property \Carbon\Carbon|null $approved_at
+ * @property \Carbon\Carbon|null $suspended_at
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @property-read User $user
+ * @property-read Election $election
+ * @property-read Position $position
+ * @property-read Admin|null $approver
+ * @property-read Admin|null $suspender
+ * @property-read \Illuminate\Database\Eloquent\Collection|CandidateActionHistory[] $actionHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|VoteTally[] $voteTallies
+ * @property-read \Illuminate\Database\Eloquent\Collection|PaymentProof[] $paymentProofs
+ */
 class Candidate extends Authenticatable
 {
     use HasFactory, Notifiable;
+
+    public int $id;
+    public ?string $suspension_reason;
 
     /**
      * The attributes that are mass assignable.

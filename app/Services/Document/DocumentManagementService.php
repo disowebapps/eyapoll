@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Document;
 
 use App\Models\Auth\IdDocument;
 use App\Models\Candidate\CandidateDocument;
@@ -246,7 +246,7 @@ class DocumentManagementService
 
         if (!$document->expiry_date) {
             $errors[] = 'Visa documents must have an expiry date.';
-        } elseif ($document->expiry_date->isPast()) {
+        } elseif (now()->gt($document->expiry_date)) {
             $errors[] = 'Visa has already expired.';
         }
 
@@ -279,11 +279,11 @@ class DocumentManagementService
             $now = now();
             $maxYears = 10; // Residence permits typically don't exceed 10 years
 
-            if ($document->expiry_date->diffInYears($now) > $maxYears) {
+            if ($now->diffInYears($document->expiry_date) > $maxYears) {
                 $errors[] = 'Residence permit expiry date seems unreasonable (more than 10 years).';
             }
 
-            if ($document->expiry_date->isPast()) {
+            if (now()->gt($document->expiry_date)) {
                 $errors[] = 'Residence permit has expired.';
             }
         }
@@ -304,14 +304,14 @@ class DocumentManagementService
 
         if (!$document->expiry_date) {
             $errors[] = 'International passport documents must have an expiry date.';
-        } elseif ($document->expiry_date->isPast()) {
+        } elseif (now()->gt($document->expiry_date)) {
             $errors[] = 'International passport has expired.';
         }
 
         // International passports typically valid for 5-10 years
         if ($document->expiry_date) {
             $issueDate = $document->created_at ?? now();
-            $validityYears = $document->expiry_date->diffInYears($issueDate);
+            $validityYears = $issueDate->diffInYears($document->expiry_date);
 
             if ($validityYears < 1 || $validityYears > 15) {
                 $errors[] = 'International passport validity period seems unusual (should be 1-15 years).';

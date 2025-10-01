@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Election;
 
 use App\Models\Election\Election;
 use App\Models\Admin;

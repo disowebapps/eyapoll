@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Application;
 
 use App\Domains\Analytics\Repository\AnalyticsRepositoryInterface;
 use Illuminate\Support\Collection;

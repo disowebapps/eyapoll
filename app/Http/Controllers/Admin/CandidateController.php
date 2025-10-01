@@ -5,18 +5,50 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate\Candidate;
 use App\Services\Candidate\CandidateService;
+use App\Models\Admin;
+use App\Http\Requests\Admin\CandidateSuspendRequest;
+use App\Http\Requests\Admin\CandidateActionRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\RedirectResponse;
+use Throwable;
 
 class CandidateController extends Controller
 {
+    private function successResponse(string $message): RedirectResponse
+    {
+        return redirect()->back()->with('success', $message);
+    }
+
+    private function errorResponse(Throwable $e, string $message): RedirectResponse
+    {
+        return redirect()
+            ->back()
+            ->withInput()
+            ->with('error', $message . ': ' . $e->getMessage());
+    }
+
     public function __construct(
         private CandidateService $candidateService
     ) {}
 
-    public function show(Candidate $candidate)
+    private function getAuthenticatedAdmin(): Admin
     {
-        
+        /** @var Admin|null $admin */
+        $admin = Admin::find(Auth::guard('admin')->id());
+        if (!$admin) {
+            throw new \RuntimeException('Admin not found');
+        }
+        return $admin;
+    }
+
+    public function show(Candidate $candidate): \Illuminate\Contracts\View\View
+    {
+        // Validation log: Confirm Log facade is accessible
+        Log::debug('CandidateController show method called', ['candidate_id' => $candidate->id]);
+
         // Performance: Load only required fields with relationships
         $candidate->loadMissing([
             'user:id,first_name,last_name,email,phone_number,created_at',
@@ -36,14 +68,14 @@ class CandidateController extends Controller
         }
 
         // Performance: Cache expensive calculations with error handling
-        $applicationProgress = \Illuminate\Support\Facades\Cache::remember(
+        $applicationProgress = Cache::remember(
             "candidate_progress_{$candidate->id}",
             300,
             function() use ($candidate) {
                 try {
                     return $candidate->getApplicationProgress();
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::warning('Error calculating progress', [
+                                        Log::warning('Error calculating progress', [
                         'candidate_id' => $candidate->id,
                         'error' => $e->getMessage()
                     ]);
@@ -52,7 +84,7 @@ class CandidateController extends Controller
             }
         );
         
-        $voteStats = \Illuminate\Support\Facades\Cache::remember(
+        $voteStats = Cache::remember(
             "candidate_votes_{$candidate->id}",
             60,
             function() use ($candidate) {
@@ -64,7 +96,7 @@ class CandidateController extends Controller
                         'is_winner' => $candidate->isWinner(),
                     ];
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::warning('Error calculating vote stats', [
+                                        Log::warning('Error calculating vote stats', [
                         'candidate_id' => $candidate->id,
                         'error' => $e->getMessage()
                     ]);
@@ -81,7 +113,7 @@ class CandidateController extends Controller
         return view('admin.candidates.edit', compact('candidate'));
     }
 
-    public function update(Request $request, Candidate $candidate)
+    public function update(Request $request, Candidate $candidate): RedirectResponse
     {
         $validated = $request->validate([
             'manifesto' => 'required|string|min:10|max:5000',
@@ -89,99 +121,127 @@ class CandidateController extends Controller
         ]);
 
         try {
-            $admin = Auth::guard('admin')->user();
+            $admin = $this->getAuthenticatedAdmin();
             $this->candidateService->editCandidate($candidate, $admin, $validated);
             
-            return redirect()->route('admin.candidates.show', $candidate)
+            Log::info('Candidate updated successfully', [
+                'candidate_id' => $candidate->id,
+                'admin_id' => $admin->getKey(),
+                'fields' => array_keys($validated)
+            ]);
+            
+            return redirect()
+                ->route('admin.candidates.show', $candidate)
                 ->with('success', 'Candidate updated successfully');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            Log::error('Failed to update candidate', [
+                'candidate_id' => $candidate->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return $this->errorResponse($e, 'Failed to update candidate');
         }
     }
 
-    public function approve(Candidate $candidate)
+    public function approve(Candidate $candidate): RedirectResponse
     {
         try {
-            $admin = Auth::guard('admin')->user();
+            $admin = $this->getAuthenticatedAdmin();
             $this->candidateService->approveCandidate($candidate, $admin, '');
             
-            return redirect()->back()->with('success', 'Candidate approved successfully');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to approve candidate: ' . $e->getMessage());
-        }
-    }
-
-    public function reject(\App\Http\Requests\Admin\CandidateActionRequest $request, Candidate $candidate)
-    {
-        try {
-            $admin = Auth::guard('admin')->user();
-            $this->candidateService->rejectCandidate($candidate, $admin, $request->reason);
-            
-            return redirect()->back()->with('success', 'Candidate rejected successfully');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to reject candidate: ' . $e->getMessage());
-        }
-    }
-
-    public function suspend(Request $request, Candidate $candidate)
-    {
-        try {
-            \Illuminate\Support\Facades\Log::info('Suspend attempt started', [
+            Log::info('Candidate approved successfully', [
                 'candidate_id' => $candidate->id,
-                'reason' => $request->input('reason'),
-                'all_input' => $request->all()
+                'admin_id' => $admin->getKey()
             ]);
             
-            if (!$request->filled('reason')) {
-                throw new \InvalidArgumentException('Reason is required');
-            }
-            
-            $admin = Auth::guard('admin')->user();
-            
-            \Illuminate\Support\Facades\Log::info('Admin retrieved', [
-                'admin_id' => $admin->id
+            return $this->successResponse('Candidate approved successfully');
+        } catch (Throwable $e) {
+            Log::error('Failed to approve candidate', [
+                'candidate_id' => $candidate->id,
+                'error' => $e->getMessage()
             ]);
             
-            $result = $this->candidateService->suspendCandidate($candidate, $admin, $request->input('reason'));
+            return $this->errorResponse($e, 'Failed to approve candidate');
+        }
+    }
+
+    public function reject(CandidateActionRequest $request, Candidate $candidate): RedirectResponse
+    {
+        try {
+            $admin = $this->getAuthenticatedAdmin();
+            $this->candidateService->rejectCandidate($candidate, $admin, $request->validated('reason'));
             
-            \Illuminate\Support\Facades\Log::info('Suspend result', [
+            Log::info('Candidate rejected successfully', [
+                'candidate_id' => $candidate->id,
+                'admin_id' => $admin->getKey()
+            ]);
+            
+            return $this->successResponse('Candidate rejected successfully');
+        } catch (Throwable $e) {
+            Log::error('Failed to reject candidate', [
+                'candidate_id' => $candidate->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return $this->errorResponse($e, 'Failed to reject candidate');
+        }
+    }
+
+    public function suspend(CandidateSuspendRequest $request, Candidate $candidate): RedirectResponse
+    {
+        try {
+            Log::info('Suspend attempt started', [
+                'candidate_id' => $candidate->id,
+                'reason' => $request->validated('reason')
+            ]);
+            
+            $admin = $this->getAuthenticatedAdmin();
+            $result = $this->candidateService->suspendCandidate($candidate, $admin, $request->validated('reason'));
+            
+            Log::info('Candidate suspended successfully', [
+                'candidate_id' => $candidate->id,
+                'admin_id' => $admin->getKey(),
                 'result' => $result
             ]);
             
-            return redirect()->back()->with('success', 'Candidate suspended successfully');
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Candidate suspension failed', [
+            return $this->successResponse('Candidate suspended successfully');
+        } catch (Throwable $e) {
+            Log::error('Candidate suspension failed', [
                 'candidate_id' => $candidate->id,
                 'admin_id' => auth('admin')->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             
-            return redirect()->back()->with('error', 'Failed to suspend candidate: ' . $e->getMessage());
+            return $this->errorResponse($e, 'Failed to suspend candidate');
         }
     }
 
-    public function unsuspend(Request $request, Candidate $candidate)
+    public function unsuspend(CandidateSuspendRequest $request, Candidate $candidate): RedirectResponse
     {
         try {
-            if (!$request->filled('reason')) {
-                throw new \InvalidArgumentException('Reason is required');
-            }
+            $admin = $this->getAuthenticatedAdmin();
+            $this->candidateService->unsuspendCandidate($candidate, $admin, $request->validated('reason'));
             
-            $admin = Auth::guard('admin')->user();
-            $this->candidateService->unsuspendCandidate($candidate, $admin, $request->input('reason'));
+            Log::info('Candidate unsuspended successfully', [
+                'candidate_id' => $candidate->id,
+                'admin_id' => $admin->getKey()
+            ]);
             
-            return redirect()->back()->with('success', 'Candidate unsuspended successfully');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to unsuspend candidate: ' . $e->getMessage());
+            return $this->successResponse('Candidate unsuspended successfully');
+        } catch (Throwable $e) {
+            Log::error('Failed to unsuspend candidate', [
+                'candidate_id' => $candidate->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return $this->errorResponse($e, 'Failed to unsuspend candidate');
         }
     }
 
 
 
-    public function downloadPaymentProof(Candidate $candidate, $proofId)
+    public function downloadPaymentProof(Candidate $candidate, int $proofId): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $proof = $candidate->paymentProofs()->findOrFail($proofId);
         $path = storage_path('app/private/payment-proofs/' . $proof->filename);

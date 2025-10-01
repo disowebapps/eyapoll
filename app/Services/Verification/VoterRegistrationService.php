@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Verification;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

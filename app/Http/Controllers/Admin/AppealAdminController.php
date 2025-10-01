@@ -23,6 +23,15 @@ class AppealAdminController extends Controller
         private AppealNotificationService $notificationService
     ) {}
 
+    private function getAuthenticatedAdmin(): Admin
+    {
+        $admin = Admin::find(Auth::guard('admin')->id());
+        if (!$admin) {
+            throw new \RuntimeException('Admin not found');
+        }
+        return $admin;
+    }
+
     /**
      * Display a listing of all appeals
      */
@@ -142,7 +151,7 @@ class AppealAdminController extends Controller
         }
 
         try {
-            $admin = Auth::guard('admin')->user();
+            $admin = $this->getAuthenticatedAdmin();
 
             $this->appealService->updateStatus(
                 $appeal,
@@ -185,7 +194,7 @@ class AppealAdminController extends Controller
         }
 
         try {
-            $admin = Auth::guard('admin')->user();
+            $admin = $this->getAuthenticatedAdmin();
 
             $this->appealService->escalateAppeal($appeal, $admin, $request->reason);
 
@@ -224,7 +233,7 @@ class AppealAdminController extends Controller
         }
 
         try {
-            $admin = Auth::guard('admin')->user();
+            $admin = $this->getAuthenticatedAdmin();
 
             if ($request->status === 'approved') {
                 $document->approve($admin, $request->review_notes);

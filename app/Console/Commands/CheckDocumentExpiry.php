@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\DocumentManagementService;
+use App\Services\Document\DocumentManagementService;
 use App\Services\Notification\NotificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;

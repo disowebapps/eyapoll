@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Application;
 
 use App\Domains\Compliance\Repository\ComplianceRepositoryInterface;
 use Illuminate\Support\Collection;

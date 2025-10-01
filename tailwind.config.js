@@ -8,6 +8,14 @@ export default {
         './resources/**/*.blade.php',
         './resources/**/*.js',
         './resources/**/*.vue',
+        './app/**/*.php',
+    ],
+    safelist: [
+        'bg-green-500',
+        'bg-red-500', 
+        'bg-yellow-500',
+        'bg-blue-500',
+        'text-white'
     ],
     theme: {
         extend: {
@@ -120,5 +128,10 @@ export default {
             },
         },
     },
-    plugins: [],
+    plugins: [
+        require('@tailwindcss/forms'),
+        require('@tailwindcss/typography'),
+        require('@tailwindcss/aspect-ratio'),
+        require('@tailwindcss/container-queries'),
+    ],
 };

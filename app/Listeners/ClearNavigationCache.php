@@ -4,7 +4,7 @@ namespace App\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Services\NavigationCacheService;
+use App\Services\Utility\NavigationCacheService;
 use App\Events\ElectionStatusChanged;
 use App\Events\ElectionCreated;
 use App\Events\ElectionUpdated;

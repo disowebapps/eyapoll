@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Election\Election;
-use App\Services\NavigationCacheService;
+use App\Services\Utility\NavigationCacheService;
 use Illuminate\Support\Facades\Log;
 
 class ElectionObserver

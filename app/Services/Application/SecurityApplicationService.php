@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Application;
 
 use App\Domains\Security\Aggregates\SecurityAggregate;
 use App\Domains\Security\Repository\SecurityRepositoryInterface;

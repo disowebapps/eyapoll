@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Utility;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class RiskScoringService
 {
@@ -227,8 +228,8 @@ class RiskScoringService
         }
 
         // Check for recent failed attempts
-        if ($user->last_verification_attempt &&
-            $user->last_verification_attempt->diffInHours(now()) < 24) {
+        if ($user->last_verification_attempt && 
+            \Carbon\Carbon::parse($user->last_verification_attempt)->diffInHours(now()) < 24) {
             $score += 0.2;
         }
 
@@ -276,7 +277,7 @@ class RiskScoringService
         }
 
         // Check results for flags (simplified)
-        $results = json_decode($user->background_check_results, true);
+        $results = is_string($user->background_check_results) ? json_decode($user->background_check_results, true) : null;
         if ($results && isset($results['flags']) && count($results['flags']) > 0) {
             return 0.8;
         }
@@ -356,7 +357,7 @@ class RiskScoringService
         return [
             'total_users' => $users->count(),
             'average_risk_score' => round($averageScore, 4),
-            'risk_distribution' => $riskLevels->map->count()->toArray(),
+            'risk_distribution' => $riskLevels->map(fn($group) => $group->count())->toArray(),
             'factor_statistics' => $factorStats,
             'high_risk_users' => $users->where('risk_level', 'high')->count(),
             'critical_risk_users' => $users->where('risk_level', 'critical')->count()

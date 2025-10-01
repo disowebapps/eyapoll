@@ -34,10 +34,13 @@ class ElectionCertificationService
             $election->update([
                 'status' => ElectionStatus::CERTIFIED,
                 'certified_at' => now(),
-                'certified_by' => $certifier->id,
+                'certified_by' => $certifier->id,  // Using foreign key column name
                 'certification_hash' => $certificationHash,
                 'certification_data' => $certificationData,
             ]);
+            
+            // Refresh the relationship
+            $election->load('certifier');
 
             // Log the certification
             $this->auditLog->log(

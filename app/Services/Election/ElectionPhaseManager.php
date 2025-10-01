@@ -7,6 +7,7 @@ use App\Enums\Election\ElectionPhase;
 use App\Services\Election\VoterRegistrationService;
 use App\Services\Audit\AuditService;
 use App\Models\Admin;
+use Illuminate\Support\Facades\Log;
 
 class ElectionPhaseManager
 {
@@ -21,7 +22,7 @@ class ElectionPhaseManager
         
         // Security: Verify transition authorization
         if (!$this->canAdminTransition($admin, $election, $targetPhase)) {
-            \Log::warning('Unauthorized phase transition attempt', [
+            Log::warning('Unauthorized phase transition attempt', [
                 'admin_id' => $admin->id,
                 'election_id' => $election->id,
                 'target_phase' => $targetPhase->value
@@ -54,7 +55,7 @@ class ElectionPhaseManager
         $election->update(['phase' => $targetPhase]);
         
         // Log the transition
-        \Log::info('Election phase transition', [
+        Log::info('Election phase transition', [
             'election_id' => $election->id,
             'from_phase' => $currentPhase?->value,
             'to_phase' => $targetPhase->value,
@@ -66,18 +67,18 @@ class ElectionPhaseManager
 
     private function handleCandidateRegistrationPhase(Election $election): void
     {
-        \Log::info('Candidate application opened', ['election_id' => $election->id]);
+        Log::info('Candidate application opened', ['election_id' => $election->id]);
     }
 
     private function handleCandidateRegistrationClosedPhase(Election $election): void
     {
         $election->update(['candidate_registration_closed' => true]);
-        \Log::info('Candidate application closed', ['election_id' => $election->id]);
+        Log::info('Candidate application closed', ['election_id' => $election->id]);
     }
 
     private function handleVoterRegistrationPhase(Election $election): void
     {
-        \Log::info('Voter registration opened', ['election_id' => $election->id]);
+        Log::info('Voter registration opened', ['election_id' => $election->id]);
     }
 
     private function handleVerificationPhase(Election $election): void
@@ -106,7 +107,7 @@ class ElectionPhaseManager
             'voter_register_locked' => true
         ]);
         
-        \Log::info('Election verification phase completed', [
+        Log::info('Election verification phase completed', [
             'election_id' => $election->id,
             'approved_candidates' => $approvedCandidates,
             'eligible_voters' => $registrationResult['tokens_created'],
@@ -119,7 +120,7 @@ class ElectionPhaseManager
         // Lock voter register - no more changes allowed
         $election->update(['voter_register_locked' => true]);
         
-        \Log::info('Election voting phase started', [
+        Log::info('Election voting phase started', [
             'election_id' => $election->id,
             'eligible_voters' => $election->voteTokens()->count()
         ]);
@@ -133,7 +134,7 @@ class ElectionPhaseManager
         // Trigger result compilation
         app(\App\Services\Election\ResultCollationService::class)->compileResults($election);
         
-        \Log::info('Election collation phase started', [
+        Log::info('Election collation phase started', [
             'election_id' => $election->id,
             'total_votes' => $election->voteRecords()->count()
         ]);
@@ -146,7 +147,7 @@ class ElectionPhaseManager
             'voter_register_locked' => false // Resume voter registration for next election
         ]);
         
-        \Log::info('Election results published - voter registration resumed', [
+        Log::info('Election results published - voter registration resumed', [
             'election_id' => $election->id
         ]);
     }
@@ -154,7 +155,7 @@ class ElectionPhaseManager
     private function handlePostElectionPhase(Election $election): void
     {
         // Archive election data, generate final reports
-        \Log::info('Election entered post-election phase', [
+        Log::info('Election entered post-election phase', [
             'election_id' => $election->id
         ]);
     }

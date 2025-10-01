@@ -6,10 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('ayapoll.platform_name', 'Echara Youths') }} - Observer Dashboard</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
 <body class="bg-gray-50 font-sans antialiased" x-data="{ sidebarOpen: false }">
@@ -160,7 +157,6 @@
     </div>
 
     @livewireScripts
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         function observerDashboard() {
             return {

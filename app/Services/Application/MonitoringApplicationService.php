@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Application;
 
 use App\Domains\Monitoring\Aggregates\MonitoringAggregate;
 use App\Domains\Monitoring\Repository\MonitoringRepositoryInterface;

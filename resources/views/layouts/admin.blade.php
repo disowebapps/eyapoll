@@ -18,11 +18,7 @@
     @endphp
 
     <!-- Styles -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/admin-dashboard.css') }}" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
     <script>
@@ -39,13 +35,7 @@
         });
     </script>
 
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        [x-cloak] { display: none !important; }
-        @media (max-width: 768px) {
-            .lg\:pl-64 { padding-left: 0 !important; }
-        }
-    </style>
+
 </head>
 <body class="bg-slate-50" x-data x-cloak>
     <!-- Desktop Sidebar -->

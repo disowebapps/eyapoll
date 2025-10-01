@@ -42,7 +42,7 @@ class ElectionFinalizationService
             // Log the finalization
             $this->auditLog->log(
                 'election_finalized',
-                $finalizer->id,
+                $finalizer,
                 'elections',
                 $election->id,
                 [

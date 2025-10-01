@@ -11,6 +11,17 @@
     
     body {
         @apply text-gray-900 antialiased;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    [x-cloak] { 
+        display: none !important; 
+    }
+    
+    @media (max-width: 768px) {
+        .lg\:pl-64 { 
+            padding-left: 0 !important; 
+        }
     }
 }
 

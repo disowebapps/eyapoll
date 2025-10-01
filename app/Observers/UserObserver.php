@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\User;
-use App\Services\NavigationCacheService;
+use App\Services\Utility\NavigationCacheService;
 use Illuminate\Support\Facades\Log;
 
 class UserObserver

@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\Election\Election;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
-use App\Services\MetricsService;
+use App\Services\Monitoring\MetricsService;
 
 class VoterAccreditation extends Component
 {

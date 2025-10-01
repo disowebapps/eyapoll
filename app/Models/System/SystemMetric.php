@@ -3,6 +3,7 @@
 namespace App\Models\System;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class SystemMetric extends Model
 {
@@ -31,11 +32,24 @@ class SystemMetric extends Model
         ]);
     }
 
-    public static function latest(string $name): ?float
+    public static function latest(string $name): float
     {
-        return self::where('metric_name', $name)
-            ->latest('recorded_at')
-            ->value('value');
+        return cache()->remember("system_metric.{$name}.latest", 60, function () use ($name) {
+            try {
+                $metric = static::query()
+                    ->where('metric_name', $name)
+                    ->latest('recorded_at')
+                    ->first();
+                    
+                return $metric ? (float)$metric->value : 0.0;
+            } catch (\Illuminate\Database\QueryException $e) {
+                Log::error('Database error while fetching metric', [
+                    'metric_name' => $name,
+                    'error' => $e->getMessage()
+                ]);
+                return 0.0;
+            }
+        });
     }
 
     public function scopeByName($query, string $name)

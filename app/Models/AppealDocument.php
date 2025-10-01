@@ -13,6 +13,9 @@ class AppealDocument extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public string $path;
+    public string $original_filename;
+
     protected $fillable = [
         'uuid',
         'appeal_id',

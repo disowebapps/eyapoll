@@ -13,10 +13,11 @@ use App\Enums\Auth\UserStatus;
 use App\Models\Election\Election;
 use App\Models\Voting\VoteToken;
 use App\Models\Auth\IdDocument;
-use App\Models\AuditLog;
+use App\Models\Audit\AuditLog;
 use App\Models\ConsensusApproval;
 use App\Models\Admin;
 use App\Models\MFASetting;
+use Carbon\Carbon;
 
 
 
@@ -28,6 +29,18 @@ use App\Models\MFASetting;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
+
+    public int $id;
+    public Carbon $created_at;
+    public ?int $verification_attempts;
+    public ?Carbon $last_verification_attempt;
+    public ?float $face_match_score;
+    public ?bool $address_verified;
+    public ?bool $background_check_completed;
+    public ?string $background_check_status;
+    public ?string $background_check_results;
+    public ?string $compliance_status;
+    public ?string $risk_factors;
 
     /**
      * The attributes that are mass assignable.
@@ -82,6 +95,15 @@ class User extends Authenticatable
         'hold_until',
         'expiry_date',
         'renewal_deadline',
+        'verification_attempts',
+        'last_verification_attempt',
+        'face_match_score',
+        'address_verified',
+        'background_check_completed',
+        'background_check_status',
+        'background_check_results',
+        'compliance_status',
+        'risk_factors',
     ];
 
     /**

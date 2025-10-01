@@ -9,7 +9,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Admin extends Authenticatable
 {
+    /**
+     * @property int $id
+     * @property string $uuid
+     * @property string $email
+     * @property string $first_name
+     * @property string $last_name
+     */
     use HasFactory, Notifiable, SoftDeletes;
+
+    public int $id;
 
     protected $fillable = [
         'uuid',

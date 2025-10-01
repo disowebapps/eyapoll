@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Monitoring;
 
 use App\Models\User;
 use App\Models\Election\Election;
@@ -341,7 +341,7 @@ class VoterStatsService
                 foreach ($candidateIds as $candidateId) {
                     $candidate = \App\Models\Candidate\Candidate::find($candidateId);
                     if ($candidate) {
-                        $candidateNames[] = $candidate->name;
+                        $candidateNames[] = $candidate->getDisplayName();
                     } else {
                         $candidateNames[] = 'Unknown Candidate';
                     }
@@ -370,7 +370,7 @@ class VoterStatsService
                                 if ($currentStatus->value === $statusFilter) {
                                     $filteredIds[] = $election->id;
                                 }
-                            } catch (\Exception $e) {}
+                            } catch (Exception $e) {}
                         }
                         $q->whereIn('id', $filteredIds);
                     });

@@ -72,7 +72,7 @@ class CryptographicService
         return match($type) {
             'numeric' => str_pad((string) random_int(0, pow(10, $length) - 1), $length, '0', STR_PAD_LEFT),
             'alphanumeric' => Str::upper(Str::random($length)),
-            'alpha' => Str::upper(Str::random($length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')),
+            'alpha' => substr(str_shuffle(str_repeat('ABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length/26))), 0, $length),
             default => str_pad((string) random_int(0, pow(10, $length) - 1), $length, '0', STR_PAD_LEFT),
         };
     }

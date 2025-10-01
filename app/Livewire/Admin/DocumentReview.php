@@ -7,7 +7,7 @@ use App\Models\Candidate\CandidateDocument;
 use App\Models\Candidate\Candidate;
 use App\Services\Auth\MFAService;
 use App\Services\AuditLoggingService;
-use App\Services\DocumentManagementService;
+use App\Services\Document\DocumentManagementService;
 use App\Services\ReviewManagementService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;

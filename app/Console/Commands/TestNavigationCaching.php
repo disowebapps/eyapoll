@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\NavigationCacheService;
-use App\Services\PerformanceMonitoringService;
+use App\Services\Utility\NavigationCacheService;
+use App\Services\Monitoring\PerformanceMonitoringService;
 use App\Models\Election\Election;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
